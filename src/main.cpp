@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <DHT.h>
 #include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h>
+#include <RemoteOTA.h>
 
 // Pin Definitions
 #define DHTPIN     13
@@ -13,12 +14,22 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 SFE_MAX1704X fuelGauge;
+const char* ssid = "Your_SSID";
+const char* password = "Your_PASSWORD";
+
+// Adjust these for your GitHub Pages links
+RemoteOTA ota(
+    "0.0.1",
+    "https://lazybiaak.github.io/smartUPS/version.txt",
+    "https://yourusername.github.io/smartUPS/.pio/build/esp32s3/firmware.bin"
+);
+
 
 void setup() {
   Serial.begin(115200);
   dht.begin();
   Wire.begin();
-
+  ota.begin(ssid, password);
   if (!fuelGauge.begin(Wire)) {
     Serial.println("MAX17048 not detected.");
   }
@@ -28,6 +39,8 @@ void setup() {
   pinMode(LED2_PIN, OUTPUT);
   pinMode(LED3_PIN, OUTPUT);
   pinMode(FAN_PIN, OUTPUT);
+
+  ota.check();  // Only check once on boot
 }
 
 void loop() {

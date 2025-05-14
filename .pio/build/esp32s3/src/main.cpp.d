@@ -182,4 +182,25 @@
  /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
  /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
  .pio/libdeps/esp32s3/DHT\ sensor\ library/DHT.h \
- .pio/libdeps/esp32s3/SparkFun\ MAX1704x\ Fuel\ Gauge\ Arduino\ Library/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h
+ .pio/libdeps/esp32s3/SparkFun\ MAX1704x\ Fuel\ Gauge\ Arduino\ Library/src/SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h \
+ lib/RemoteOTA/RemoteOTA.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFi.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPv6Address.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiType.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiSTA.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiGeneric.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_wifi/include/esp_smartconfig.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/wifi_provisioning/include/wifi_provisioning/manager.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/protocomm/include/common/protocomm.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/protocomm/include/security/protocomm_security.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/wifi_provisioning/include/wifi_provisioning/wifi_config.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiAP.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiScan.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiClient.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/Client.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiServer.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/Server.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
+ /home/biaak/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h
