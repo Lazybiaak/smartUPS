@@ -3,6 +3,7 @@
 #include <DHT.h>
 #include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h>
 #include <RemoteOTA.h>
+#include <SmartBlynk.h>
 
 // Pin Definitions
 #define DHTPIN     13
@@ -23,7 +24,7 @@ RemoteOTA ota(
     "https://lazybiaak.github.io/smartUPS/ota/version.txt",
     "https://lazybiaak.github.io/smartUPS/ota/firmware.bin"
 );
-
+SmartBlynk blynk(BLYNK_AUTH, ssid, password, &dht, &battery, FAN_PIN, LED_PIN);
 
 void setup() {
   Serial.begin(115200);
@@ -41,9 +42,11 @@ void setup() {
   pinMode(FAN_PIN, OUTPUT);
 
   ota.check();  // Only check once on boot
+  blynk.begin();
 }
 
 void loop() {
+   Blynk.run();
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
   float volt = fuelGauge.getVoltage();
@@ -63,4 +66,5 @@ void loop() {
   digitalWrite(FAN_PIN, temp > 35 ? HIGH : LOW);
 
   delay(500);
+  blynk.update();
 }
