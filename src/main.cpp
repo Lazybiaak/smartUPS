@@ -20,8 +20,8 @@ const char* password = "Your_PASSWORD";
 // Adjust these for your GitHub Pages links
 RemoteOTA ota(
     "0.0.1",
-    "https://lazybiaak.github.io/smartUPS/version/version.txt",
-    "https://yourusername.github.io/smartUPS/.pio/build/esp32s3/firmware.bin"
+    "https://lazybiaak.github.io/smartUPS/ota/version.txt",
+    "https://lazybiaak.github.io/smartUPS/ota/firmware.bin"
 );
 
 
