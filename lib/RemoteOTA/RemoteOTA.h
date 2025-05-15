@@ -10,14 +10,15 @@ public:
               const char* firmwareURL);
 
     void begin(const char* ssid, const char* password);
-    void check();
+    void check(bool forceUpdate = false); // Optional flag to force OTA
 
 private:
-    const char* _ssid;
-    const char* _password;
     const char* _currentVersion;
     const char* _versionURL;
     const char* _firmwareURL;
+
+    String fetchRemoteVersion();
+    bool downloadAndUpdate();
 };
 
 #endif

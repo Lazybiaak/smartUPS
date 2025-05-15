@@ -1,3 +1,13 @@
+// ============================
+// Smart UPS Firmware
+// by lazybiaak
+// github.com/lazybiaak/SmartUPS
+// ============================
+
+#define BLYNK_TEMPLATE_ID "TMPL6T0AuvhpP"
+#define BLYNK_TEMPLATE_NAME "Smart Cradle"
+#define BLYNK_AUTH_TOKEN "XgpNxiG07kYwcghBjQtaT3HPPyYY1AQM"
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <DHT.h>
@@ -5,66 +15,73 @@
 #include <RemoteOTA.h>
 #include <SmartBlynk.h>
 
-// Pin Definitions
-#define DHTPIN     13
-#define DHTTYPE    DHT11
-#define LED1_PIN   4
-#define LED2_PIN   5
-#define LED3_PIN   6
-#define FAN_PIN    7
+// ==== Pin Definitions ====
+constexpr uint8_t DHTPIN = 13;
+constexpr uint8_t DHTTYPE = DHT11;
+constexpr uint8_t LED1_PIN = 4;
+constexpr uint8_t LED2_PIN = 5;
+constexpr uint8_t LED3_PIN = 6;
+constexpr uint8_t FAN_PIN  = 7;
 
+// ==== Global Objects ====
 DHT dht(DHTPIN, DHTTYPE);
 SFE_MAX1704X fuelGauge;
+
 const char* ssid = "Your_SSID";
 const char* password = "Your_PASSWORD";
 
-// Adjust these for your GitHub Pages links
 RemoteOTA ota(
     "0.0.1",
     "https://lazybiaak.github.io/smartUPS/ota/version.txt",
     "https://lazybiaak.github.io/smartUPS/ota/firmware.bin"
 );
-SmartBlynk blynk(BLYNK_AUTH, ssid, password, &dht, &battery, FAN_PIN, LED_PIN);
 
-void setup() {
-  Serial.begin(115200);
+SmartBlynk blynk(BLYNK_AUTH_TOKEN, ssid, password, &dht, &fuelGauge, FAN_PIN, LED1_PIN);
+
+// ==== Initialization ====
+void initializeHardware() {
   dht.begin();
   Wire.begin();
-  ota.begin(ssid, password);
+
   if (!fuelGauge.begin(Wire)) {
     Serial.println("MAX17048 not detected.");
   }
 
-  // Initialize output pins
-  pinMode(LED1_PIN, OUTPUT);
-  pinMode(LED2_PIN, OUTPUT);
-  pinMode(LED3_PIN, OUTPUT);
-  pinMode(FAN_PIN, OUTPUT);
+  for (uint8_t pin : {LED1_PIN, LED2_PIN, LED3_PIN, FAN_PIN}) {
+    pinMode(pin, OUTPUT);
+  }
+}
 
-  ota.check();  // Only check once on boot
+void updateIndicators(float temp, float volt) {
+  digitalWrite(LED1_PIN, temp > 30);              // Overheat
+  digitalWrite(LED2_PIN, volt < 3.5);             // Low Battery
+  digitalWrite(LED3_PIN, millis() / 500 % 2);     // System Heartbeat
+  digitalWrite(FAN_PIN, temp > 35);               // Fan Control
+}
+
+// ==== Arduino Setup ====
+void setup() {
+  Serial.begin(115200);
+  initializeHardware();
+
+  ota.begin(ssid, password);
+  ota.check();  // OTA check once at boot
+
   blynk.begin();
 }
 
+// ==== Main Loop ====
 void loop() {
-   Blynk.run();
+  Blynk.run();
+
   float temp = dht.readTemperature();
-  float hum = dht.readHumidity();
+  float hum  = dht.readHumidity();
   float volt = fuelGauge.getVoltage();
 
   Serial.printf("Temp: %.1f°C | Humidity: %.1f%% | Voltage: %.2fV\n", temp, hum, volt);
 
-  // LED1 = Overheat warning (Temp > 30°C)
-  digitalWrite(LED1_PIN, temp > 30 ? HIGH : LOW);
-
-  // LED2 = Battery low warning (Voltage < 3.5V)
-  digitalWrite(LED2_PIN, volt < 3.5 ? HIGH : LOW);
-
-  // LED3 = System OK (blinks every 0.5s)
-  digitalWrite(LED3_PIN, millis() / 500 % 2 == 0 ? HIGH : LOW);
-
-  // FAN control logic (turn on if temp > 35°C)
-  digitalWrite(FAN_PIN, temp > 35 ? HIGH : LOW);
+  updateIndicators(temp, volt);
+  blynk.update();
 
   delay(500);
-  blynk.update();
 }

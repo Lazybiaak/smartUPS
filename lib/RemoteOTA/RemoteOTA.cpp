@@ -10,70 +10,94 @@ RemoteOTA::RemoteOTA(const char* currentVersion,
       _firmwareURL(firmwareURL) {}
 
 void RemoteOTA::begin(const char* ssid, const char* password) {
-    _ssid = ssid;
-    _password = password;
-
-    WiFi.begin(_ssid, _password);
+    WiFi.begin(ssid, password);
     Serial.print("Connecting to WiFi");
+    unsigned long start = millis();
+
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
+        if (millis() - start > 15000) {  // timeout after 15s
+            Serial.println("\nWiFi connection failed.");
+            return;
+        }
     }
-    Serial.println("\nConnected! IP: " + WiFi.localIP().toString());
+
+    Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
 }
 
-void RemoteOTA::check() {
-    HTTPClient http;
-    http.begin(_versionURL);
-    int httpCode = http.GET();
+void RemoteOTA::check(bool forceUpdate) {
+    String remoteVersion = fetchRemoteVersion();
 
-    if (httpCode == 200) {
-        String newVersion = http.getString();
-        newVersion.trim();
-        Serial.printf("Available version: %s\n", newVersion.c_str());
-
-        if (newVersion != _currentVersion) {
-            Serial.println("New version found! Starting OTA...");
-            http.end();
-
-            http.begin(_firmwareURL);
-            int code = http.GET();
-
-            if (code == 200) {
-                int len = http.getSize();
-                WiFiClient* stream = http.getStreamPtr();
-
-                if (!Update.begin(len)) {
-                    Serial.println("Update.begin() failed");
-                    return;
-                }
-
-                size_t written = Update.writeStream(*stream);
-                if (written == len) {
-                    Serial.println("Firmware written successfully");
-                } else {
-                    Serial.printf("Written only %d/%d bytes\n", (int)written, len);
-                }
-
-                if (Update.end()) {
-                    if (Update.isFinished()) {
-                        Serial.println("OTA complete. Rebooting...");
-                        ESP.restart();
-                    } else {
-                        Serial.println("Update not finished.");
-                    }
-                } else {
-                    Serial.printf("Update error: %s\n", Update.errorString());
-                }
-            } else {
-                Serial.printf("Firmware download failed: %d\n", code);
-            }
-        } else {
-            Serial.println("Firmware is up to date.");
-        }
-    } else {
-        Serial.printf("Version check failed: %d\n", httpCode);
+    if (remoteVersion.isEmpty()) {
+        Serial.println("⚠️  Version check failed.");
+        return;
     }
 
+    Serial.printf("Current: %s | Remote: %s\n", _currentVersion, remoteVersion.c_str());
+
+    if (remoteVersion != _currentVersion || forceUpdate) {
+        Serial.println("🔁 Starting OTA update...");
+        if (downloadAndUpdate()) {
+            Serial.println("✅ OTA update successful. Restarting...");
+            ESP.restart();
+        } else {
+            Serial.println("❌ OTA update failed.");
+        }
+    } else {
+        Serial.println("✅ Firmware is up-to-date.");
+    }
+}
+
+String RemoteOTA::fetchRemoteVersion() {
+    HTTPClient http;
+    http.begin(_versionURL);
+    int code = http.GET();
+
+    if (code == 200) {
+        String version = http.getString();
+        version.trim();
+        http.end();
+        return version;
+    }
+
+    Serial.printf("HTTP error while checking version: %d\n", code);
     http.end();
+    return "";
+}
+
+bool RemoteOTA::downloadAndUpdate() {
+    HTTPClient http;
+    http.begin(_firmwareURL);
+    int code = http.GET();
+
+    if (code != 200) {
+        Serial.printf("Failed to download firmware: HTTP %d\n", code);
+        http.end();
+        return false;
+    }
+
+    int len = http.getSize();
+    WiFiClient* stream = http.getStreamPtr();
+
+    if (!Update.begin(len)) {
+        Serial.println("Update.begin() failed.");
+        http.end();
+        return false;
+    }
+
+    size_t written = Update.writeStream(*stream);
+    if (written != len) {
+        Serial.printf("Only %u of %u bytes written\n", (unsigned)written, len);
+        http.end();
+        return false;
+    }
+
+    if (!Update.end()) {
+        Serial.printf("Update error: %s\n", Update.errorString());
+        http.end();
+        return false;
+    }
+
+    return Update.isFinished();
 }
