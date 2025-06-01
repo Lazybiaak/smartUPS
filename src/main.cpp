@@ -18,10 +18,10 @@
 // ==== Pin Definitions ====
 constexpr uint8_t DHTPIN = 13;
 constexpr uint8_t DHTTYPE = DHT11;
-constexpr uint8_t LED1_PIN = 4;
-constexpr uint8_t LED2_PIN = 5;
-constexpr uint8_t LED3_PIN = 6;
-constexpr uint8_t FAN_PIN  = 7;
+constexpr uint8_t LED1_PIN = 15;
+constexpr uint8_t LED2_PIN = 2;
+constexpr uint8_t LED3_PIN = 4;
+constexpr uint8_t FAN_PIN  = 5;
 
 // ==== Config ====
 const char* ssid = "Apple";
@@ -58,13 +58,13 @@ void initializeHardware() {
   dht.begin();
   Wire.begin();
 
-  if (!fuelGauge.begin(Wire)) {
-    Serial.println("⚠️  MAX17048 not detected.");
-  }
+  if (!fuelGauge.begin()) {
+  Serial.println("Fuel gauge not found. Check wiring!");
+}
 
-  for (uint8_t pin : {LED1_PIN, LED2_PIN, LED3_PIN, FAN_PIN}) {
-    pinMode(pin, OUTPUT);
-  }
+  for (uint8_t pin : {LED1_PIN, LED2_PIN, LED3_PIN, FAN_PIN}){pinMode(pin, OUTPUT);digitalWrite(pin, LOW);}
+
+  Serial.println("Hardware initialized successfully.");
 }
 
 void updateIndicators(float temp, float volt) {
@@ -76,7 +76,7 @@ void updateIndicators(float temp, float volt) {
   digitalWrite(LED3_PIN, millis() / 500 % 2);    // System heartbeat
   digitalWrite(FAN_PIN, fanState);               // Fan control
 
-  Serial.printf("🌀 Fan: %s\n", fanState ? "ON" : "OFF");
+  Serial.printf("Fan: %s\n", fanState ? "ON" : "OFF");
 
   // Push to Blynk
   Blynk.virtualWrite(VPIN_TEMP, temp);
@@ -98,6 +98,7 @@ void setup() {
 
 // ==== Loop ====
 void loop() {
+  Serial.println("Running main loop...");
   Blynk.run();
 
   float temp = dht.readTemperature();
@@ -105,12 +106,12 @@ void loop() {
   float volt = fuelGauge.getVoltage();
 
   if (isnan(temp) || isnan(hum)) {
-    Serial.println("⚠️  DHT read failed.");
+    Serial.println("DHT read failed.");
     delay(500);
     return;
   }
 
-  Serial.printf("🌡️ Temp: %.1f°C | 💧 Hum: %.1f%% | 🔋 Volt: %.2fV\n", temp, hum, volt);
+  Serial.printf("Temp: %.1f°C | Hum: %.1f%% | Volt: %.2fV\n", temp, hum, volt);
 
   // Battery Alert
   if (volt < VOLTAGE_LOW_THRESHOLD && !lowBatteryNotified) {
