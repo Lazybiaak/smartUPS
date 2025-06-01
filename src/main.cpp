@@ -32,7 +32,7 @@ const char* password = "123456789";
 DHT dht(DHTPIN, DHTTYPE);
 SFE_MAX1704X fuelGauge;
 RemoteOTA ota(
-  "0.0.1",
+  "0.0.2",
   "https://lazybiaak.github.io/smartUPS/ota/version.txt",
   "https://lazybiaak.github.io/smartUPS/ota/firmware.bin"
 );
