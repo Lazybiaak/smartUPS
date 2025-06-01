@@ -5,7 +5,7 @@
 // ============================
 
 #define BLYNK_TEMPLATE_ID "TMPL6T0AuvhpP"
-#define BLYNK_TEMPLATE_NAME "Smart Cradle"
+#define BLYNK_TEMPLATE_NAME "Smart UPS"
 #define BLYNK_AUTH_TOKEN "XgpNxiG07kYwcghBjQtaT3HPPyYY1AQM"
 
 #include <Arduino.h>
@@ -24,8 +24,8 @@ constexpr uint8_t LED3_PIN = 6;
 constexpr uint8_t FAN_PIN  = 7;
 
 // ==== Config ====
-const char* ssid = "Your_SSID";
-const char* password = "Your_PASSWORD";
+const char* ssid = "Apple";
+const char* password = "123456789";
 #define VOLTAGE_LOW_THRESHOLD 3.4
 
 // ==== Global Objects ====
